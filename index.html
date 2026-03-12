@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WorkerConnect — Kaam Ka Platform</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --orange: #FF5C1A;
+            --orange-light: #FF7A42;
+            --dark: #0D0D0D;
+            --dark2: #161616;
+            --dark3: #1F1F1F;
+            --gray: #888;
+            --white: #ffffff;
+            --green: #2ECC71;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background-color: var(--dark);
+            color: var(--white);
+            overflow-x: hidden;
+        }
+
+        /* LANGUAGE SWITCHER */
+        .lang-bar {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 200;
+            background: rgba(255,92,26,0.95);
+            display: flex;
+            justify-content: center;
+            gap: 4px;
+            padding: 6px 12px;
+        }
+        .lang-btn {
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.3);
+            color: rgba(255,255,255,0.7);
+            padding: 4px 14px;
+            border-radius: 100px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: 'DM Sans', sans-serif;
+            transition: all 0.2s;
+            letter-spacing: 0.5px;
+        }
+        .lang-btn:hover { background: rgba(255,255,255,0.15); color: white; }
+        .lang-btn.active {
+            background: white;
+            color: var(--orange);
+            border-color: white;
+        }
+
+        nav {
+            position: fixed;
+            top: 36px; left: 0; right: 0;
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 18px 60px;
+            background: rgba(13,13,13,0.9);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+        .logo {
+            font-family: 'Syne', sans-serif;
+            font-weight: 800;
+            font-size: 22px;
+            letter-spacing: -0.5px;
+        }
+        .logo span { color: var(--orange); }
+        .nav-links { display: flex; gap: 32px; align-items: center; }
+        .nav-links a {
+            color: var(--gray);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+        .nav-links a:hover { color: white; }
+        .nav-cta {
+            background: var(--orange) !important;
+            color: white !important;
+            padding: 10px 22px;
+            border-radius: 8px;
+        }
+
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            padding: 160px 60px 80px;
+            position: relative;
+            overflow: hidden;
+        }
+        .hero::after {
+            content: '';
+            position: absolute;
+            top: -200px; right: -200px;
+            width: 700px; height: 700px;
+            background: radial-gradient(circle, rgba(255,92,26,0.12) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+        .hero-left { max-width: 620px; z-index: 1; }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255,92,26,0.12);
+            border: 1px solid rgba(255,92,26,0.3);
+            color: var(--orange);
+            padding: 6px 14px;
+            border-radius: 100px;
+            font-size: 13px;
+            font-weight: 500;
+            margin-bottom: 28px;
+            animation: fadeUp 0.6s ease both;
+        }
+        .badge::before {
+            content: '';
+            width: 7px; height: 7px;
+            background: var(--orange);
+            border-radius: 50%;
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.3); }
+        }
+
+        .hero h1 {
+            font-family: 'Syne', sans-serif;
+            font-weight: 800;
+            font-size: clamp(40px, 6vw, 68px);
+            line-height: 1.05;
+            letter-spacing: -2px;
+            margin-bottom: 24px;
+            animation: fadeUp 0.6s 0.1s ease both;
+        }
+        .hero h1 .highlight { color: var(--orange); }
+
+        .hero p {
+            font-size: 18px;
+            color: var(--gray);
+            line-height: 1.7;
+            max-width: 480px;
+            margin-bottom: 44px;
+            font-weight: 300;
+            animation: fadeUp 0.6s 0.2s ease both;
+        }
+
+        .hero-btns {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            animation: fadeUp 0.6s 0.3s ease both;
+        }
+
+        .btn-primary {
+            background: var(--orange);
+            color: white;
+            padding: 16px 32px;
+            border: none;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            font-family: 'DM Sans', sans-serif;
+            transition: all 0.2s;
+        }
+        .btn-primary:hover {
+            background: var(--orange-light);
+            transform: translateY(-2px);
+            box-shadow: 0 12px 32px rgba(255,92,26,0.3);
+        }
+        .btn-secondary {
+            background: transparent;
+            color: white;
+            padding: 16px 32px;
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            font-family: 'DM Sans', sans-serif;
+            transition: all 0.2s;
+        }
+        .btn-secondary:hover {
+            border-color: rgba(255,255,255,0.4);
+            transform: translateY(-2px);
+        }
+
+        .hero-stats {
+            position: absolute;
+            right: 80px; top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            animation: fadeLeft 0.8s 0.4s ease both;
+            z-index: 1;
+        }
+        @keyframes fadeLeft {
+            from { opacity: 0; transform: translateY(-50%) translateX(40px); }
+            to   { opacity: 1; transform: translateY(-50%) translateX(0); }
+        }
+        .stat-card {
+            background: var(--dark2);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 16px;
+            padding: 20px 28px;
+            text-align: center;
+            min-width: 160px;
+            transition: border-color 0.2s;
+        }
+        .stat-card:hover { border-color: rgba(255,92,26,0.3); }
+        .stat-number {
+            font-family: 'Syne', sans-serif;
+            font-size: 32px;
+            font-weight: 800;
+            color: var(--orange);
+        }
+        .stat-label {
+            font-size: 12px;
+            color: var(--gray);
+            margin-top: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+        }
+
+        .marquee-strip {
+            background: var(--orange);
+            padding: 14px 0;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+        .marquee-inner {
+            display: inline-flex;
+            gap: 48px;
+            animation: marquee 20s linear infinite;
+        }
+        .marquee-inner span {
+            font-family: 'Syne', sans-serif;
+            font-weight: 700;
+            font-size: 13px;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: white;
+        }
+        .marquee-inner span.dot { color: rgba(255,255,255,0.5); }
+        @keyframes marquee {
+            from { transform: translateX(0); }
+            to   { transform: translateX(-50%); }
+        }
+
+        .section { padding: 100px 60px; }
+        .section-tag {
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--orange);
+            margin-bottom: 16px;
+        }
+        .section-title {
+            font-family: 'Syne', sans-serif;
+            font-size: clamp(28px, 4vw, 44px);
+            font-weight: 800;
+            letter-spacing: -1px;
+            margin-bottom: 60px;
+        }
+
+        .steps-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 2px;
+        }
+        .step-card {
+            background: var(--dark2);
+            padding: 40px 32px;
+            position: relative;
+            overflow: hidden;
+            transition: background 0.3s;
+        }
+        .step-card:first-child { border-radius: 16px 0 0 16px; }
+        .step-card:last-child  { border-radius: 0 16px 16px 0; }
+        .step-card:hover { background: var(--dark3); }
+        .step-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background: var(--orange);
+            transform: scaleX(0);
+            transition: transform 0.3s;
+            transform-origin: left;
+        }
+        .step-card:hover::before { transform: scaleX(1); }
+        .step-num {
+            font-family: 'Syne', sans-serif;
+            font-size: 48px;
+            font-weight: 800;
+            color: rgba(255,92,26,0.15);
+            margin-bottom: 20px;
+            line-height: 1;
+        }
+        .step-icon  { font-size: 28px; margin-bottom: 16px; }
+        .step-title { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 700; margin-bottom: 10px; }
+        .step-desc  { font-size: 14px; color: var(--gray); line-height: 1.7; }
+
+        .for-section {
+            padding: 0 60px 100px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+        .for-card {
+            border-radius: 20px;
+            padding: 48px;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s;
+        }
+        .for-card:hover { transform: translateY(-4px); }
+        .for-card.worker {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+        .for-card.company {
+            background: linear-gradient(135deg, #1a0f0a 0%, #2d1a0e 100%);
+            border: 1px solid rgba(255,92,26,0.2);
+        }
+        .for-card .glow {
+            position: absolute;
+            bottom: -60px; right: -60px;
+            width: 200px; height: 200px;
+            border-radius: 50%;
+            filter: blur(60px);
+            opacity: 0.3;
+        }
+        .worker .glow  { background: #4f6ef7; }
+        .company .glow { background: var(--orange); }
+        .for-emoji { font-size: 48px; margin-bottom: 20px; }
+        .for-title { font-family: 'Syne', sans-serif; font-size: 26px; font-weight: 800; margin-bottom: 12px; }
+        .for-desc  { color: var(--gray); font-size: 15px; line-height: 1.7; margin-bottom: 28px; }
+        .for-list  { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+        .for-list li {
+            font-size: 14px;
+            color: rgba(255,255,255,0.75);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .for-list li::before {
+            content: '✓';
+            color: var(--green);
+            font-weight: 700;
+            font-size: 13px;
+            background: rgba(46,204,113,0.1);
+            border-radius: 50%;
+            width: 22px; height: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .skills-section { padding: 0 60px 100px; }
+        .skills-grid { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 40px; }
+        .skill-tag {
+            background: var(--dark2);
+            border: 1px solid rgba(255,255,255,0.08);
+            padding: 10px 20px;
+            border-radius: 100px;
+            font-size: 14px;
+            color: rgba(255,255,255,0.7);
+            transition: all 0.2s;
+            cursor: default;
+        }
+        .skill-tag:hover {
+            border-color: var(--orange);
+            color: var(--orange);
+            background: rgba(255,92,26,0.06);
+        }
+
+        .cta-section {
+            margin: 0 60px 100px;
+            background: linear-gradient(135deg, var(--orange) 0%, #e63000 100%);
+            border-radius: 24px;
+            padding: 80px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .cta-section::before {
+            content: 'W';
+            position: absolute;
+            font-family: 'Syne', sans-serif;
+            font-size: 300px;
+            font-weight: 800;
+            color: rgba(255,255,255,0.05);
+            top: -60px; right: -20px;
+            pointer-events: none;
+            line-height: 1;
+        }
+        .cta-section h2 {
+            font-family: 'Syne', sans-serif;
+            font-size: clamp(28px, 4vw, 48px);
+            font-weight: 800;
+            letter-spacing: -1px;
+            margin-bottom: 16px;
+            position: relative;
+        }
+        .cta-section p { font-size: 17px; opacity: 0.85; margin-bottom: 40px; position: relative; }
+        .cta-btns { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; position: relative; }
+        .btn-white {
+            background: white; color: var(--orange);
+            padding: 16px 36px; border: none;
+            border-radius: 10px; font-size: 15px;
+            font-weight: 600; cursor: pointer;
+            font-family: 'DM Sans', sans-serif;
+            transition: all 0.2s;
+        }
+        .btn-white:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(0,0,0,0.2); }
+        .btn-outline-white {
+            background: transparent; color: white;
+            padding: 16px 36px;
+            border: 2px solid rgba(255,255,255,0.5);
+            border-radius: 10px; font-size: 15px;
+            font-weight: 600; cursor: pointer;
+            font-family: 'DM Sans', sans-serif;
+            transition: all 0.2s;
+        }
+        .btn-outline-white:hover { border-color: white; transform: translateY(-2px); }
+
+        footer {
+            border-top: 1px solid rgba(255,255,255,0.07);
+            padding: 40px 60px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        footer p { color: var(--gray); font-size: 13px; }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(24px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .reveal {
+            opacity: 0; transform: translateY(30px);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+        .reveal.visible { opacity: 1; transform: translateY(0); }
+
+        @media (max-width: 900px) {
+            nav { padding: 16px 24px; top: 34px; }
+            .nav-links { display: none; }
+            .hero { padding: 130px 24px 60px; }
+            .hero-stats { display: none; }
+            .section { padding: 60px 24px; }
+            .for-section { grid-template-columns: 1fr; padding: 0 24px 60px; }
+            .skills-section { padding: 0 24px 60px; }
+            .cta-section { margin: 0 24px 60px; padding: 48px 24px; }
+            footer { flex-direction: column; gap: 12px; text-align: center; padding: 32px 24px; }
+            .steps-grid { grid-template-columns: 1fr; gap: 12px; }
+            .step-card { border-radius: 12px !important; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- LANGUAGE BAR -->
+    <div class="lang-bar">
+        <button class="lang-btn active" onclick="setLang('hi')">हिंदी</button>
+        <button class="lang-btn" onclick="setLang('en')">English</button>
+        <button class="lang-btn" onclick="setLang('hl')">Hinglish</button>
+        <button class="lang-btn" onclick="setLang('mr')">मराठी</button>
+    </div>
+
+    <!-- NAVBAR -->
+    <nav>
+        <div class="logo">Worker<span>Connect</span></div>
+        <div class="nav-links">
+            <a href="#" data-key="nav_platform">Platform</a>
+            <a href="#" data-key="nav_workers">Workers</a>
+            <a href="#" data-key="nav_companies">Companies</a>
+            <a href="#" data-key="nav_about">About</a>
+            <a href="#" class="nav-cta" data-key="nav_cta">Get Started →</a>
+        </div>
+    </nav>
+
+    <!-- HERO -->
+    <section class="hero">
+        <div class="hero-left">
+            <div class="badge" data-key="badge">India Ka #1 Worker Platform</div>
+            <h1>
+                <span data-key="hero_line1">Sahi</span> <span class="highlight" data-key="hero_line2">Kaam</span><br>
+                <span data-key="hero_line3">Sahi</span> <span class="highlight" data-key="hero_line4">Worker</span><br>
+                <span data-key="hero_line5">Har Baar.</span>
+            </h1>
+            <p data-key="hero_desc">Daily wage workers aur companies ko ek powerful platform pe connect karo — fast, secure, aur transparent.</p>
+            <div class="hero-btns">
+                <button class="btn-primary" data-key="btn_worker" onclick="window.location.href='login.html?type=worker'">👷 Worker Hoon →</button>
+<button class="btn-secondary" data-key="btn_company" onclick="window.location.href='login.html?type=company'">🏢 Company Hoon</button>
+            </div>
+        </div>
+        <div class="hero-stats">
+            <div class="stat-card">
+                <div class="stat-number">12K+</div>
+                <div class="stat-label" data-key="stat_workers">Workers</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">850+</div>
+                <div class="stat-label" data-key="stat_companies">Companies</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">98%</div>
+                <div class="stat-label" data-key="stat_satisfaction">Satisfaction</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- MARQUEE -->
+    <div class="marquee-strip">
+        <div class="marquee-inner">
+            <span data-key="skill_1">Electrician</span><span class="dot">◆</span>
+            <span data-key="skill_2">Plumber</span><span class="dot">◆</span>
+            <span data-key="skill_3">Carpenter</span><span class="dot">◆</span>
+            <span data-key="skill_4">Painter</span><span class="dot">◆</span>
+            <span data-key="skill_5">Mason</span><span class="dot">◆</span>
+            <span data-key="skill_6">Welder</span><span class="dot">◆</span>
+            <span data-key="skill_7">Driver</span><span class="dot">◆</span>
+            <span data-key="skill_8">Helper</span><span class="dot">◆</span>
+            <span data-key="skill_9">Security Guard</span><span class="dot">◆</span>
+            <span data-key="skill_10">Cleaner</span><span class="dot">◆</span>
+            <!-- duplicate for loop -->
+            <span data-key="skill_1">Electrician</span><span class="dot">◆</span>
+            <span data-key="skill_2">Plumber</span><span class="dot">◆</span>
+            <span data-key="skill_3">Carpenter</span><span class="dot">◆</span>
+            <span data-key="skill_4">Painter</span><span class="dot">◆</span>
+            <span data-key="skill_5">Mason</span><span class="dot">◆</span>
+            <span data-key="skill_6">Welder</span><span class="dot">◆</span>
+            <span data-key="skill_7">Driver</span><span class="dot">◆</span>
+            <span data-key="skill_8">Helper</span><span class="dot">◆</span>
+            <span data-key="skill_9">Security Guard</span><span class="dot">◆</span>
+            <span data-key="skill_10">Cleaner</span><span class="dot">◆</span>
+        </div>
+    </div>
+
+    <!-- HOW IT WORKS -->
+    <section class="section">
+        <div class="section-tag" data-key="process_tag">Process</div>
+        <div class="section-title" data-key="process_title">Kaise Kaam Karta Hai?</div>
+        <div class="steps-grid reveal">
+            <div class="step-card">
+                <div class="step-num">01</div>
+                <div class="step-icon">📝</div>
+                <div class="step-title" data-key="step1_title">Register Karo</div>
+                <div class="step-desc"  data-key="step1_desc">Worker ya Company — apna account banao. Sirf 2 minute lagenge.</div>
+            </div>
+            <div class="step-card">
+                <div class="step-num">02</div>
+                <div class="step-icon">🔍</div>
+                <div class="step-title" data-key="step2_title">Search Karo</div>
+                <div class="step-desc"  data-key="step2_desc">Location, skill, aur rate ke hisaab se perfect match dhundo.</div>
+            </div>
+            <div class="step-card">
+                <div class="step-num">03</div>
+                <div class="step-icon">🤝</div>
+                <div class="step-title" data-key="step3_title">Connect Karo</div>
+                <div class="step-desc"  data-key="step3_desc">Worker ka profile dekho, seedha contact karo, booking confirm karo.</div>
+            </div>
+            <div class="step-card">
+                <div class="step-num">04</div>
+                <div class="step-icon">✅</div>
+                <div class="step-title" data-key="step4_title">Kaam Karo</div>
+                <div class="step-desc"  data-key="step4_desc">Kaam complete hone pe secure payment aur honest review do.</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOR WHO -->
+    <div class="for-section">
+        <div class="for-card worker reveal">
+            <div class="glow"></div>
+            <div class="for-emoji">👷</div>
+            <div class="for-title" data-key="worker_title">Workers Ke Liye</div>
+            <div class="for-desc"  data-key="worker_desc">Apna skill register karo aur apne area mein zyada kaam pao. Koi middle-man nahi.</div>
+            <ul class="for-list">
+                <li data-key="w1">Free profile banao</li>
+                <li data-key="w2">Apna rate khud set karo</li>
+                <li data-key="w3">Direct companies se connect karo</li>
+                <li data-key="w4">Har kaam ke baad review milega</li>
+                <li data-key="w5">Secure payment guarantee</li>
+            </ul>
+        </div>
+        <div class="for-card company reveal">
+            <div class="glow"></div>
+            <div class="for-emoji">🏢</div>
+            <div class="for-title" data-key="company_title">Companies Ke Liye</div>
+            <div class="for-desc"  data-key="company_desc">Verified workers ko minutes mein dhundo. Background check included.</div>
+            <ul class="for-list">
+                <li data-key="c1">Verified worker database</li>
+                <li data-key="c2">Location-based search</li>
+                <li data-key="c3">Skill aur experience filter</li>
+                <li data-key="c4">Contract management</li>
+                <li data-key="c5">Payment tracking dashboard</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- SKILLS -->
+    <div class="skills-section reveal">
+        <div class="section-tag" data-key="skills_tag">Categories</div>
+        <div class="section-title" data-key="skills_title">Kaunsi Skills Available Hain?</div>
+        <div class="skills-grid">
+            <div class="skill-tag">⚡ <span data-key="skill_1">Electrician</span></div>
+            <div class="skill-tag">🔧 <span data-key="skill_2">Plumber</span></div>
+            <div class="skill-tag">🪚 <span data-key="skill_3">Carpenter</span></div>
+            <div class="skill-tag">🎨 <span data-key="skill_4">Painter</span></div>
+            <div class="skill-tag">🧱 <span data-key="skill_5">Mason</span></div>
+            <div class="skill-tag">🔨 <span data-key="skill_6">Welder</span></div>
+            <div class="skill-tag">🚗 <span data-key="skill_7">Driver</span></div>
+            <div class="skill-tag">🧹 <span data-key="skill_10">Cleaner</span></div>
+            <div class="skill-tag">🔒 <span data-key="skill_9">Security Guard</span></div>
+            <div class="skill-tag">🏗️ <span data-key="skill_8">Helper</span></div>
+            <div class="skill-tag">📦 Loader</div>
+            <div class="skill-tag">🌿 Gardener</div>
+            <div class="skill-tag">🍳 Cook</div>
+            <div class="skill-tag">🔩 AC Technician</div>
+        </div>
+    </div>
+
+    <!-- CTA -->
+    <div class="cta-section reveal">
+        <h2 data-key="cta_title">Aaj Hi Shuru Karo — Free Hai!</h2>
+        <p data-key="cta_desc">Hazaaron workers aur companies already platform pe hain. Ab tumhari bari.</p>
+        <div class="cta-btns">
+            <button class="btn-white" data-key="btn_worker">👷 Worker Register Karo</button>
+            <button class="btn-outline-white" data-key="btn_company">🏢 Company Account Banao</button>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer>
+        <div class="logo">Worker<span style="color:var(--orange)">Connect</span></div>
+        <p data-key="footer_text">© 2024 WorkerConnect. India Ka Apna Platform. 🇮🇳</p>
+    </footer>
+
+    <script>
+    // ─── ALL TRANSLATIONS ───────────────────────────────────────────────
+    const translations = {
+        hi: {
+            nav_platform:"प्लेटफ़ॉर्म", nav_workers:"वर्कर्स", nav_companies:"कंपनियाँ", nav_about:"हमारे बारे में", nav_cta:"शुरू करें →",
+            badge:"भारत का #1 वर्कर प्लेटफ़ॉर्म",
+            hero_line1:"सही", hero_line2:"काम", hero_line3:"सही", hero_line4:"वर्कर", hero_line5:"हर बार।",
+            hero_desc:"दैनिक मज़दूरों और कंपनियों को एक शक्तिशाली प्लेटफ़ॉर्म पर जोड़ें — तेज़, सुरक्षित और पारदर्शी।",
+            btn_worker:"👷 मैं वर्कर हूँ →", btn_company:"🏢 मैं कंपनी हूँ",
+            stat_workers:"वर्कर्स", stat_companies:"कंपनियाँ", stat_satisfaction:"संतुष्टि",
+            process_tag:"प्रक्रिया", process_title:"यह कैसे काम करता है?",
+            step1_title:"रजिस्टर करें", step1_desc:"वर्कर या कंपनी — अपना अकाउंट बनाएं। सिर्फ 2 मिनट लगेंगे।",
+            step2_title:"खोजें", step2_desc:"लोकेशन, स्किल और रेट के हिसाब से परफेक्ट मैच ढूंढें।",
+            step3_title:"जुड़ें", step3_desc:"वर्कर की प्रोफाइल देखें, सीधे संपर्क करें, बुकिंग कन्फर्म करें।",
+            step4_title:"काम करें", step4_desc:"काम पूरा होने पर सुरक्षित भुगतान और ईमानदार समीक्षा दें।",
+            worker_title:"वर्कर्स के लिए", worker_desc:"अपनी स्किल रजिस्टर करें और अपने एरिया में ज़्यादा काम पाएं।",
+            w1:"फ्री प्रोफाइल बनाएं", w2:"अपना रेट खुद तय करें", w3:"सीधे कंपनियों से जुड़ें", w4:"हर काम के बाद रिव्यू मिलेगा", w5:"सुरक्षित भुगतान गारंटी",
+            company_title:"कंपनियों के लिए", company_desc:"मिनटों में वेरिफाइड वर्कर ढूंढें। बैकग्राउंड चेक शामिल।",
+            c1:"वेरिफाइड वर्कर डेटाबेस", c2:"लोकेशन-बेस्ड सर्च", c3:"स्किल और अनुभव फ़िल्टर", c4:"कॉन्ट्रैक्ट मैनेजमेंट", c5:"पेमेंट ट्रैकिंग डैशबोर्ड",
+            skills_tag:"श्रेणियाँ", skills_title:"कौन सी स्किल्स उपलब्ध हैं?",
+            skill_1:"इलेक्ट्रीशियन", skill_2:"प्लंबर", skill_3:"बढ़ई", skill_4:"पेंटर", skill_5:"राज मिस्त्री", skill_6:"वेल्डर", skill_7:"ड्राइवर", skill_8:"हेल्पर", skill_9:"सुरक्षा गार्ड", skill_10:"सफाई कर्मचारी",
+            cta_title:"आज ही शुरू करें — बिल्कुल फ्री!", cta_desc:"हज़ारों वर्कर और कंपनियाँ पहले से प्लेटफ़ॉर्म पर हैं। अब आपकी बारी।",
+            footer_text:"© 2024 WorkerConnect. भारत का अपना प्लेटफ़ॉर्म। 🇮🇳"
+        },
+        en: {
+            nav_platform:"Platform", nav_workers:"Workers", nav_companies:"Companies", nav_about:"About", nav_cta:"Get Started →",
+            badge:"India's #1 Worker Platform",
+            hero_line1:"Right", hero_line2:"Jobs", hero_line3:"Right", hero_line4:"Workers", hero_line5:"Every Time.",
+            hero_desc:"Connecting daily wage workers and companies on one powerful platform — fast, secure, and transparent.",
+            btn_worker:"👷 I'm a Worker →", btn_company:"🏢 I'm a Company",
+            stat_workers:"Workers", stat_companies:"Companies", stat_satisfaction:"Satisfaction",
+            process_tag:"Process", process_title:"How Does It Work?",
+            step1_title:"Register", step1_desc:"Worker or Company — create your account. Takes just 2 minutes.",
+            step2_title:"Search", step2_desc:"Find the perfect match by location, skill, and rate.",
+            step3_title:"Connect", step3_desc:"View worker profiles, contact directly, confirm your booking.",
+            step4_title:"Work", step4_desc:"Once work is done, make a secure payment and leave an honest review.",
+            worker_title:"For Workers", worker_desc:"Register your skill and get more work in your area. No middlemen.",
+            w1:"Create free profile", w2:"Set your own rate", w3:"Connect directly with companies", w4:"Get reviews after every job", w5:"Secure payment guarantee",
+            company_title:"For Companies", company_desc:"Find verified workers in minutes. Background check included.",
+            c1:"Verified worker database", c2:"Location-based search", c3:"Skill & experience filter", c4:"Contract management", c5:"Payment tracking dashboard",
+            skills_tag:"Categories", skills_title:"Which Skills Are Available?",
+            skill_1:"Electrician", skill_2:"Plumber", skill_3:"Carpenter", skill_4:"Painter", skill_5:"Mason", skill_6:"Welder", skill_7:"Driver", skill_8:"Helper", skill_9:"Security Guard", skill_10:"Cleaner",
+            cta_title:"Start Today — It's Free!", cta_desc:"Thousands of workers and companies are already on the platform. Now it's your turn.",
+            footer_text:"© 2024 WorkerConnect. Made for India. 🇮🇳"
+        },
+        hl: {
+            nav_platform:"Platform", nav_workers:"Workers", nav_companies:"Companies", nav_about:"About Us", nav_cta:"Shuru Karo →",
+            badge:"India Ka #1 Worker Platform",
+            hero_line1:"Sahi", hero_line2:"Kaam", hero_line3:"Sahi", hero_line4:"Worker", hero_line5:"Har Baar.",
+            hero_desc:"Daily wage workers aur companies ko ek powerful platform pe connect karo — fast, secure, aur transparent.",
+            btn_worker:"👷 Main Worker Hoon →", btn_company:"🏢 Main Company Hoon",
+            stat_workers:"Workers", stat_companies:"Companies", stat_satisfaction:"Satisfaction",
+            process_tag:"Process", process_title:"Ye Kaise Kaam Karta Hai?",
+            step1_title:"Register Karo", step1_desc:"Worker ya Company — apna account banao. Sirf 2 minute lagenge.",
+            step2_title:"Search Karo", step2_desc:"Location, skill, aur rate ke hisaab se perfect match dhundo.",
+            step3_title:"Connect Karo", step3_desc:"Worker ka profile dekho, seedha contact karo, booking confirm karo.",
+            step4_title:"Kaam Karo", step4_desc:"Kaam complete hone pe secure payment aur honest review do.",
+            worker_title:"Workers Ke Liye", worker_desc:"Apni skill register karo aur apne area mein zyada kaam pao. Koi middleman nahi.",
+            w1:"Free profile banao", w2:"Apna rate khud set karo", w3:"Direct companies se connect karo", w4:"Har kaam ke baad review milega", w5:"Secure payment guarantee",
+            company_title:"Companies Ke Liye", company_desc:"Verified workers ko minutes mein dhundo. Background check included.",
+            c1:"Verified worker database", c2:"Location-based search", c3:"Skill aur experience filter", c4:"Contract management", c5:"Payment tracking dashboard",
+            skills_tag:"Categories", skills_title:"Kaunsi Skills Available Hain?",
+            skill_1:"Electrician", skill_2:"Plumber", skill_3:"Carpenter", skill_4:"Painter", skill_5:"Mason / Raj Mistri", skill_6:"Welder", skill_7:"Driver", skill_8:"Helper", skill_9:"Security Guard", skill_10:"Cleaner",
+            cta_title:"Aaj Hi Shuru Karo — Free Hai!", cta_desc:"Hazaaron workers aur companies already platform pe hain. Ab tumhari bari.",
+            footer_text:"© 2024 WorkerConnect. India Ka Apna Platform. 🇮🇳"
+        },
+        mr: {
+            nav_platform:"प्लॅटफॉर्म", nav_workers:"कामगार", nav_companies:"कंपन्या", nav_about:"आमच्याबद्दल", nav_cta:"सुरू करा →",
+            badge:"भारताचा #1 कामगार प्लॅटफॉर्म",
+            hero_line1:"योग्य", hero_line2:"काम", hero_line3:"योग्य", hero_line4:"कामगार", hero_line5:"प्रत्येक वेळी.",
+            hero_desc:"दैनंदिन मजूर आणि कंपन्यांना एका शक्तिशाली प्लॅटफॉर्मवर जोडा — जलद, सुरक्षित आणि पारदर्शक.",
+            btn_worker:"👷 मी कामगार आहे →", btn_company:"🏢 मी कंपनी आहे",
+            stat_workers:"कामगार", stat_companies:"कंपन्या", stat_satisfaction:"समाधान",
+            process_tag:"प्रक्रिया", process_title:"हे कसे काम करते?",
+            step1_title:"नोंदणी करा", step1_desc:"कामगार किंवा कंपनी — आपले खाते तयार करा. फक्त 2 मिनिटे लागतील.",
+            step2_title:"शोधा", step2_desc:"स्थान, कौशल्य आणि दरानुसार परिपूर्ण जुळणी शोधा.",
+            step3_title:"जोडा", step3_desc:"कामगाराचे प्रोफाइल पहा, थेट संपर्क करा, बुकिंग निश्चित करा.",
+            step4_title:"काम करा", step4_desc:"काम पूर्ण झाल्यावर सुरक्षित पेमेंट करा आणि प्रामाणिक समीक्षा द्या.",
+            worker_title:"कामगारांसाठी", worker_desc:"आपले कौशल्य नोंदवा आणि आपल्या परिसरात अधिक काम मिळवा.",
+            w1:"मोफत प्रोफाइल तयार करा", w2:"स्वतःचा दर ठरवा", w3:"थेट कंपन्यांशी जोडा", w4:"प्रत्येक कामानंतर समीक्षा मिळेल", w5:"सुरक्षित पेमेंट हमी",
+            company_title:"कंपन्यांसाठी", company_desc:"मिनिटांत सत्यापित कामगार शोधा. बॅकग्राउंड चेक समाविष्ट.",
+            c1:"सत्यापित कामगार डेटाबेस", c2:"स्थान-आधारित शोध", c3:"कौशल्य आणि अनुभव फिल्टर", c4:"करार व्यवस्थापन", c5:"पेमेंट ट्रॅकिंग डॅशबोर्ड",
+            skills_tag:"श्रेणी", skills_title:"कोणती कौशल्ये उपलब्ध आहेत?",
+            skill_1:"इलेक्ट्रिशियन", skill_2:"प्लंबर", skill_3:"सुतार", skill_4:"रंगारी", skill_5:"गवंडी", skill_6:"वेल्डर", skill_7:"चालक", skill_8:"मदतनीस", skill_9:"सुरक्षा रक्षक", skill_10:"सफाई कामगार",
+            cta_title:"आजच सुरू करा — मोफत आहे!", cta_desc:"हजारो कामगार आणि कंपन्या आधीच प्लॅटफॉर्मवर आहेत. आता तुमची वेळ.",
+            footer_text:"© 2024 WorkerConnect. भारताचा स्वतःचा प्लॅटफॉर्म. 🇮🇳"
+        }
+    };
+
+    // ─── APPLY LANGUAGE ─────────────────────────────────────────────────
+    function setLang(lang) {
+        const t = translations[lang];
+        document.querySelectorAll('[data-key]').forEach(el => {
+            if (t[el.dataset.key]) el.textContent = t[el.dataset.key];
+        });
+        // active button highlight
+        document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
+        event.target.classList.add('active');
+    }
+
+    // default = Hindi
+    document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('[data-key]').forEach(el => {
+            const t = translations['hi'];
+            if (t[el.dataset.key]) el.textContent = t[el.dataset.key];
+        });
+    });
+
+    // ─── SCROLL REVEAL ───────────────────────────────────────────────────
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry, i) => {
+            if (entry.isIntersecting)
+                setTimeout(() => entry.target.classList.add('visible'), i * 100);
+        });
+    }, { threshold: 0.1 });
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+    </script>
+
+</body>
+</html>

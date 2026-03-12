@@ -1,0 +1,1005 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WorkerConnect — Workers Dhundo</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --orange: #FF5C1A;
+            --orange-light: #FF7A42;
+            --dark: #0D0D0D;
+            --dark2: #161616;
+            --dark3: #1F1F1F;
+            --dark4: #252525;
+            --gray: #888;
+            --white: #ffffff;
+            --green: #2ECC71;
+            --yellow: #f39c12;
+            --blue: #3498db;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--dark);
+            color: var(--white);
+            min-height: 100vh;
+        }
+
+        /* NAV */
+        nav {
+            position: sticky;
+            top: 0; z-index: 100;
+            background: rgba(13,13,13,0.95);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            padding: 16px 60px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .logo {
+            font-family: 'Syne', sans-serif;
+            font-weight: 800;
+            font-size: 20px;
+            text-decoration: none;
+            color: white;
+        }
+        .logo span { color: var(--orange); }
+        .nav-right { display: flex; gap: 12px; align-items: center; }
+        .btn-nav {
+            background: var(--orange);
+            color: white;
+            border: none;
+            padding: 9px 20px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: 'DM Sans', sans-serif;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+        .btn-nav:hover { background: var(--orange-light); }
+        .btn-nav-outline {
+            background: transparent;
+            color: white;
+            border: 1px solid rgba(255,255,255,0.15);
+            padding: 9px 20px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            font-family: 'DM Sans', sans-serif;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+        .btn-nav-outline:hover { border-color: rgba(255,255,255,0.4); }
+
+        /* HERO SEARCH */
+        .search-hero {
+            background: linear-gradient(135deg, #1a0f0a 0%, #0d0d0d 60%);
+            border-bottom: 1px solid rgba(255,92,26,0.15);
+            padding: 60px;
+            position: relative;
+            overflow: hidden;
+        }
+        .search-hero::before {
+            content: '';
+            position: absolute;
+            top: -100px; right: -100px;
+            width: 400px; height: 400px;
+            background: radial-gradient(circle, rgba(255,92,26,0.1) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+        .search-hero h1 {
+            font-family: 'Syne', sans-serif;
+            font-size: clamp(28px, 4vw, 42px);
+            font-weight: 800;
+            letter-spacing: -1px;
+            margin-bottom: 8px;
+        }
+        .search-hero h1 span { color: var(--orange); }
+        .search-hero p {
+            color: var(--gray);
+            font-size: 15px;
+            margin-bottom: 32px;
+        }
+
+        /* SEARCH BOX */
+        .search-box {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            max-width: 900px;
+        }
+        .search-input-wrap {
+            flex: 2;
+            min-width: 220px;
+            position: relative;
+        }
+        .search-input-wrap input {
+            width: 100%;
+            background: var(--dark2);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: white;
+            padding: 14px 16px 14px 44px;
+            border-radius: 12px;
+            font-size: 15px;
+            font-family: 'DM Sans', sans-serif;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .search-input-wrap input:focus { border-color: var(--orange); }
+        .search-input-wrap input::placeholder { color: var(--gray); }
+        .search-input-wrap::before {
+            content: '🔍';
+            position: absolute;
+            left: 14px; top: 50%;
+            transform: translateY(-50%);
+            font-size: 16px;
+        }
+
+        .filter-sel {
+            flex: 1;
+            min-width: 150px;
+            background: var(--dark2);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: white;
+            padding: 14px 16px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-family: 'DM Sans', sans-serif;
+            outline: none;
+            cursor: pointer;
+            transition: border-color 0.2s;
+        }
+        .filter-sel:focus { border-color: var(--orange); }
+        .filter-sel option { background: var(--dark2); }
+
+        .btn-search-main {
+            background: var(--orange);
+            color: white;
+            border: none;
+            padding: 14px 32px;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: 'DM Sans', sans-serif;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+        .btn-search-main:hover {
+            background: var(--orange-light);
+            transform: translateY(-1px);
+            box-shadow: 0 8px 24px rgba(255,92,26,0.3);
+        }
+
+        /* QUICK FILTERS */
+        .quick-filters {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+        .qf-btn {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: rgba(255,255,255,0.6);
+            padding: 6px 14px;
+            border-radius: 100px;
+            font-size: 13px;
+            cursor: pointer;
+            font-family: 'DM Sans', sans-serif;
+            transition: all 0.2s;
+        }
+        .qf-btn:hover, .qf-btn.active {
+            background: rgba(255,92,26,0.12);
+            border-color: var(--orange);
+            color: var(--orange);
+        }
+
+        /* MAIN LAYOUT */
+        .main-layout {
+            display: flex;
+            gap: 0;
+            min-height: calc(100vh - 200px);
+        }
+
+        /* SIDEBAR FILTERS */
+        .filter-sidebar {
+            width: 260px;
+            flex-shrink: 0;
+            background: var(--dark2);
+            border-right: 1px solid rgba(255,255,255,0.06);
+            padding: 28px 20px;
+            position: sticky;
+            top: 73px;
+            height: calc(100vh - 73px);
+            overflow-y: auto;
+        }
+        .filter-title {
+            font-family: 'Syne', sans-serif;
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: var(--gray);
+            margin-bottom: 14px;
+            margin-top: 20px;
+        }
+        .filter-title:first-child { margin-top: 0; }
+
+        .filter-option {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            color: rgba(255,255,255,0.7);
+            transition: all 0.2s;
+            user-select: none;
+        }
+        .filter-option:hover { background: var(--dark3); color: white; }
+        .filter-option input[type="checkbox"] { accent-color: var(--orange); width: 15px; height: 15px; cursor: pointer; }
+
+        .range-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: var(--gray);
+            margin-bottom: 8px;
+        }
+        input[type="range"] {
+            width: 100%;
+            accent-color: var(--orange);
+            cursor: pointer;
+        }
+
+        .btn-apply-filter {
+            width: 100%;
+            background: var(--orange);
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: 'DM Sans', sans-serif;
+            margin-top: 20px;
+            transition: all 0.2s;
+        }
+        .btn-apply-filter:hover { background: var(--orange-light); }
+
+        .btn-clear-filter {
+            width: 100%;
+            background: transparent;
+            color: var(--gray);
+            border: 1px solid rgba(255,255,255,0.08);
+            padding: 10px;
+            border-radius: 10px;
+            font-size: 13px;
+            cursor: pointer;
+            font-family: 'DM Sans', sans-serif;
+            margin-top: 8px;
+            transition: all 0.2s;
+        }
+        .btn-clear-filter:hover { color: white; border-color: rgba(255,255,255,0.2); }
+
+        /* RESULTS */
+        .results-area {
+            flex: 1;
+            padding: 28px 32px;
+        }
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .results-count {
+            font-family: 'Syne', sans-serif;
+            font-size: 18px;
+            font-weight: 700;
+        }
+        .results-count span { color: var(--orange); }
+
+        .sort-select {
+            background: var(--dark2);
+            border: 1px solid rgba(255,255,255,0.08);
+            color: white;
+            padding: 9px 14px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-family: 'DM Sans', sans-serif;
+            outline: none;
+            cursor: pointer;
+        }
+        .sort-select option { background: var(--dark2); }
+
+        /* WORKER CARD */
+        .worker-card {
+            background: var(--dark2);
+            border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 16px;
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
+            transition: all 0.2s;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+        .worker-card::before {
+            content: '';
+            position: absolute;
+            left: 0; top: 0; bottom: 0;
+            width: 3px;
+            background: var(--orange);
+            transform: scaleY(0);
+            transition: transform 0.2s;
+            transform-origin: bottom;
+        }
+        .worker-card:hover {
+            border-color: rgba(255,92,26,0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        }
+        .worker-card:hover::before { transform: scaleY(1); }
+
+        .worker-avatar {
+            width: 64px; height: 64px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--orange), #e63000);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            flex-shrink: 0;
+            position: relative;
+        }
+        .online-indicator {
+            position: absolute;
+            bottom: 2px; right: 2px;
+            width: 14px; height: 14px;
+            background: var(--green);
+            border-radius: 50%;
+            border: 2px solid var(--dark2);
+        }
+
+        .worker-body { flex: 1; }
+        .worker-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 8px;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .worker-name {
+            font-family: 'Syne', sans-serif;
+            font-weight: 800;
+            font-size: 18px;
+        }
+        .worker-rate {
+            font-family: 'Syne', sans-serif;
+            font-size: 18px;
+            font-weight: 800;
+            color: var(--green);
+        }
+        .worker-skill-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(255,92,26,0.1);
+            border: 1px solid rgba(255,92,26,0.2);
+            color: var(--orange);
+            padding: 4px 12px;
+            border-radius: 100px;
+            font-size: 13px;
+            font-weight: 500;
+            margin-bottom: 12px;
+        }
+
+        .worker-meta-row {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+        }
+        .worker-meta-row span {
+            font-size: 13px;
+            color: rgba(255,255,255,0.55);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .worker-tags {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 16px;
+        }
+        .tag {
+            background: var(--dark3);
+            border: 1px solid rgba(255,255,255,0.07);
+            color: rgba(255,255,255,0.6);
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+        }
+
+        .worker-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .btn-hire {
+            background: var(--orange);
+            color: white;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: 'DM Sans', sans-serif;
+            transition: all 0.2s;
+        }
+        .btn-hire:hover {
+            background: var(--orange-light);
+            transform: translateY(-1px);
+        }
+        .btn-profile {
+            background: transparent;
+            color: white;
+            border: 1px solid rgba(255,255,255,0.12);
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-size: 14px;
+            cursor: pointer;
+            font-family: 'DM Sans', sans-serif;
+            transition: all 0.2s;
+        }
+        .btn-profile:hover { border-color: rgba(255,255,255,0.3); }
+        .btn-save {
+            background: transparent;
+            color: var(--gray);
+            border: 1px solid rgba(255,255,255,0.08);
+            padding: 10px 14px;
+            border-radius: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-save:hover { color: var(--orange); border-color: var(--orange); }
+
+        .stars { color: var(--yellow); font-size: 13px; letter-spacing: 1px; }
+        .review-count { font-size: 12px; color: var(--gray); margin-left: 4px; }
+
+        /* VERIFIED BADGE */
+        .verified {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: rgba(46,204,113,0.1);
+            border: 1px solid rgba(46,204,113,0.2);
+            color: var(--green);
+            padding: 3px 8px;
+            border-radius: 100px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+
+        /* PAGINATION */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 32px;
+            flex-wrap: wrap;
+        }
+        .page-btn {
+            background: var(--dark2);
+            border: 1px solid rgba(255,255,255,0.08);
+            color: var(--gray);
+            width: 40px; height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: 'DM Sans', sans-serif;
+        }
+        .page-btn:hover { border-color: var(--orange); color: white; }
+        .page-btn.active { background: var(--orange); border-color: var(--orange); color: white; }
+
+        /* TOAST */
+        .toast {
+            position: fixed;
+            bottom: 32px; right: 32px;
+            background: var(--dark2);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-left: 4px solid var(--green);
+            color: white;
+            padding: 16px 20px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 500;
+            z-index: 999;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s;
+            max-width: 300px;
+        }
+        .toast.show { transform: translateY(0); opacity: 1; }
+
+        /* NO RESULTS */
+        .no-results {
+            text-align: center;
+            padding: 80px 20px;
+            display: none;
+        }
+        .no-results.show { display: block; }
+        .no-results .emoji { font-size: 48px; margin-bottom: 16px; }
+        .no-results h3 { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+        .no-results p { color: var(--gray); font-size: 14px; }
+
+        @media (max-width: 900px) {
+            nav { padding: 14px 20px; }
+            .search-hero { padding: 32px 20px; }
+            .filter-sidebar { display: none; }
+            .results-area { padding: 20px; }
+            .worker-card { flex-direction: column; }
+            .worker-top { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+    <a href="index.html" class="logo">Worker<span>Connect</span></a>
+    <div class="nav-right">
+        <a href="login.html?type=worker" class="btn-nav-outline">Login</a>
+        <a href="company-dashboard.html" class="btn-nav">Company Dashboard</a>
+    </div>
+</nav>
+
+<!-- SEARCH HERO -->
+<div class="search-hero">
+    <h1>Apne Area Mein <span>Skilled Workers</span> Dhundo</h1>
+    <p>20,000+ verified workers available — electrician, plumber, carpenter aur bahut kuch</p>
+
+    <div class="search-box">
+        <div class="search-input-wrap">
+            <input type="text" id="searchInput" placeholder="Skill ya worker ka naam likhо..." oninput="filterWorkers()">
+        </div>
+        <select class="filter-sel" id="skillFilter" onchange="filterWorkers()">
+            <option value="">Sab Skills</option>
+            <option>Electrician</option>
+            <option>Plumber</option>
+            <option>Carpenter</option>
+            <option>Painter</option>
+            <option>Mason</option>
+            <option>Welder</option>
+            <option>Driver</option>
+            <option>Security Guard</option>
+        </select>
+        <select class="filter-sel" id="cityFilter" onchange="filterWorkers()">
+            <option value="">Sab Cities</option>
+            <option>Mumbai</option>
+            <option>Delhi</option>
+            <option>Pune</option>
+            <option>Thane</option>
+            <option>Bangalore</option>
+        </select>
+        <button class="btn-search-main" onclick="filterWorkers()">Search Karo</button>
+    </div>
+
+    <div class="quick-filters">
+        <button class="qf-btn active" onclick="quickFilter('all', this)">🔥 Sab Workers</button>
+        <button class="qf-btn" onclick="quickFilter('online', this)">🟢 Online Abhi</button>
+        <button class="qf-btn" onclick="quickFilter('top', this)">⭐ Top Rated</button>
+        <button class="qf-btn" onclick="quickFilter('cheap', this)">💰 Kam Rate</button>
+        <button class="qf-btn" onclick="quickFilter('verified', this)">✅ Verified Only</button>
+    </div>
+</div>
+
+<!-- MAIN LAYOUT -->
+<div class="main-layout">
+
+    <!-- FILTER SIDEBAR -->
+    <div class="filter-sidebar">
+        <div class="filter-title">Rating</div>
+        <label class="filter-option"><input type="checkbox" checked> ⭐⭐⭐⭐⭐ 5 Star</label>
+        <label class="filter-option"><input type="checkbox" checked> ⭐⭐⭐⭐ 4+ Star</label>
+        <label class="filter-option"><input type="checkbox"> ⭐⭐⭐ 3+ Star</label>
+
+        <div class="filter-title">Daily Rate</div>
+        <div class="range-row">
+            <span>₹0</span>
+            <span id="rangeVal">₹2000</span>
+        </div>
+        <input type="range" min="500" max="5000" value="2000" step="100"
+            oninput="document.getElementById('rangeVal').textContent = '₹' + this.value">
+
+        <div class="filter-title">Experience</div>
+        <label class="filter-option"><input type="checkbox"> 0-1 saal</label>
+        <label class="filter-option"><input type="checkbox" checked> 1-3 saal</label>
+        <label class="filter-option"><input type="checkbox" checked> 3-5 saal</label>
+        <label class="filter-option"><input type="checkbox"> 5+ saal</label>
+
+        <div class="filter-title">Availability</div>
+        <label class="filter-option"><input type="checkbox" checked> Abhi Available</label>
+        <label class="filter-option"><input type="checkbox"> Is Hafte</label>
+        <label class="filter-option"><input type="checkbox"> Is Mahine</label>
+
+        <div class="filter-title">Other</div>
+        <label class="filter-option"><input type="checkbox" checked> ✅ Verified Only</label>
+        <label class="filter-option"><input type="checkbox"> 📸 Photo Hai</label>
+
+        <button class="btn-apply-filter" onclick="showToast('✅ Filters apply ho gaye!')">Filters Apply Karo</button>
+        <button class="btn-clear-filter" onclick="clearFilters()">Clear All Filters</button>
+    </div>
+
+    <!-- RESULTS -->
+    <div class="results-area">
+        <div class="results-header">
+            <div class="results-count"><span id="resultCount">6</span> Workers Mile</div>
+            <select class="sort-select" onchange="filterWorkers()">
+                <option>Rating ke hisaab se</option>
+                <option>Rate: Kam se Zyada</option>
+                <option>Rate: Zyada se Kam</option>
+                <option>Experience: Zyada</option>
+                <option>Naye Members</option>
+            </select>
+        </div>
+
+        <div id="workersList">
+
+            <!-- WORKER 1 -->
+            <div class="worker-card" data-skill="electrician" data-city="mumbai" data-online="true" data-rating="4.8" data-rate="1200">
+                <div class="worker-avatar">
+                    👷
+                    <div class="online-indicator"></div>
+                </div>
+                <div class="worker-body">
+                    <div class="worker-top">
+                        <div>
+                            <div class="worker-name">
+                                Ramesh Kumar
+                                <span class="verified">✅ Verified</span>
+                            </div>
+                            <div style="margin-top:6px">
+                                <span class="stars">★★★★★</span>
+                                <span class="review-count">(24 reviews)</span>
+                            </div>
+                        </div>
+                        <div class="worker-rate">₹1,200/din</div>
+                    </div>
+                    <div class="worker-skill-badge">⚡ Electrician</div>
+                    <div class="worker-meta-row">
+                        <span>📍 Andheri, Mumbai</span>
+                        <span>💼 5 saal experience</span>
+                        <span>🟢 Abhi Online</span>
+                        <span>✅ 12 jobs done</span>
+                    </div>
+                    <div class="worker-tags">
+                        <span class="tag">Wiring</span>
+                        <span class="tag">MCB Panel</span>
+                        <span class="tag">AC Installation</span>
+                        <span class="tag">Commercial</span>
+                    </div>
+                    <div class="worker-actions">
+                        <button class="btn-hire" onclick="hireWorker(this, 'Ramesh Kumar')">🤝 Hire Karo</button>
+                        <button class="btn-profile">👤 Profile Dekho</button>
+                        <button class="btn-save" onclick="saveWorker(this)">🔖</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- WORKER 2 -->
+            <div class="worker-card" data-skill="plumber" data-city="mumbai" data-online="true" data-rating="4.5" data-rate="900">
+                <div class="worker-avatar">👷</div>
+                <div class="worker-body">
+                    <div class="worker-top">
+                        <div>
+                            <div class="worker-name">
+                                Suresh Patel
+                                <span class="verified">✅ Verified</span>
+                            </div>
+                            <div style="margin-top:6px">
+                                <span class="stars">★★★★☆</span>
+                                <span class="review-count">(18 reviews)</span>
+                            </div>
+                        </div>
+                        <div class="worker-rate">₹900/din</div>
+                    </div>
+                    <div class="worker-skill-badge">🔧 Plumber</div>
+                    <div class="worker-meta-row">
+                        <span>📍 Borivali, Mumbai</span>
+                        <span>💼 3 saal experience</span>
+                        <span>🟢 Abhi Online</span>
+                        <span>✅ 8 jobs done</span>
+                    </div>
+                    <div class="worker-tags">
+                        <span class="tag">Pipe Fitting</span>
+                        <span class="tag">Bathroom</span>
+                        <span class="tag">Leakage Fix</span>
+                    </div>
+                    <div class="worker-actions">
+                        <button class="btn-hire" onclick="hireWorker(this, 'Suresh Patel')">🤝 Hire Karo</button>
+                        <button class="btn-profile">👤 Profile Dekho</button>
+                        <button class="btn-save" onclick="saveWorker(this)">🔖</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- WORKER 3 -->
+            <div class="worker-card" data-skill="carpenter" data-city="mumbai" data-online="false" data-rating="4.9" data-rate="1500">
+                <div class="worker-avatar">👷</div>
+                <div class="worker-body">
+                    <div class="worker-top">
+                        <div>
+                            <div class="worker-name">
+                                Vikram Singh
+                                <span class="verified">✅ Verified</span>
+                            </div>
+                            <div style="margin-top:6px">
+                                <span class="stars">★★★★★</span>
+                                <span class="review-count">(31 reviews)</span>
+                            </div>
+                        </div>
+                        <div class="worker-rate">₹1,500/din</div>
+                    </div>
+                    <div class="worker-skill-badge">🪚 Carpenter</div>
+                    <div class="worker-meta-row">
+                        <span>📍 Malad, Mumbai</span>
+                        <span>💼 7 saal experience</span>
+                        <span>⚫ Offline</span>
+                        <span>✅ 21 jobs done</span>
+                    </div>
+                    <div class="worker-tags">
+                        <span class="tag">Furniture</span>
+                        <span class="tag">Door/Window</span>
+                        <span class="tag">Interior Work</span>
+                        <span class="tag">Modular</span>
+                    </div>
+                    <div class="worker-actions">
+                        <button class="btn-hire" onclick="hireWorker(this, 'Vikram Singh')">🤝 Hire Karo</button>
+                        <button class="btn-profile">👤 Profile Dekho</button>
+                        <button class="btn-save" onclick="saveWorker(this)">🔖</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- WORKER 4 -->
+            <div class="worker-card" data-skill="painter" data-city="thane" data-online="true" data-rating="4.7" data-rate="800">
+                <div class="worker-avatar">👷
+                    <div class="online-indicator"></div>
+                </div>
+                <div class="worker-body">
+                    <div class="worker-top">
+                        <div>
+                            <div class="worker-name">Mohan Das</div>
+                            <div style="margin-top:6px">
+                                <span class="stars">★★★★★</span>
+                                <span class="review-count">(15 reviews)</span>
+                            </div>
+                        </div>
+                        <div class="worker-rate">₹800/din</div>
+                    </div>
+                    <div class="worker-skill-badge">🎨 Painter</div>
+                    <div class="worker-meta-row">
+                        <span>📍 Thane, Mumbai</span>
+                        <span>💼 4 saal experience</span>
+                        <span>🟢 Abhi Online</span>
+                        <span>✅ 9 jobs done</span>
+                    </div>
+                    <div class="worker-tags">
+                        <span class="tag">Interior</span>
+                        <span class="tag">Exterior</span>
+                        <span class="tag">Texture</span>
+                    </div>
+                    <div class="worker-actions">
+                        <button class="btn-hire" onclick="hireWorker(this, 'Mohan Das')">🤝 Hire Karo</button>
+                        <button class="btn-profile">👤 Profile Dekho</button>
+                        <button class="btn-save" onclick="saveWorker(this)">🔖</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- WORKER 5 -->
+            <div class="worker-card" data-skill="welder" data-city="pune" data-online="false" data-rating="4.6" data-rate="1300">
+                <div class="worker-avatar">👷</div>
+                <div class="worker-body">
+                    <div class="worker-top">
+                        <div>
+                            <div class="worker-name">
+                                Anil Sharma
+                                <span class="verified">✅ Verified</span>
+                            </div>
+                            <div style="margin-top:6px">
+                                <span class="stars">★★★★☆</span>
+                                <span class="review-count">(20 reviews)</span>
+                            </div>
+                        </div>
+                        <div class="worker-rate">₹1,300/din</div>
+                    </div>
+                    <div class="worker-skill-badge">🔨 Welder</div>
+                    <div class="worker-meta-row">
+                        <span>📍 Pune</span>
+                        <span>💼 6 saal experience</span>
+                        <span>⚫ Offline</span>
+                        <span>✅ 16 jobs done</span>
+                    </div>
+                    <div class="worker-tags">
+                        <span class="tag">Arc Welding</span>
+                        <span class="tag">Gate/Grill</span>
+                        <span class="tag">Industrial</span>
+                    </div>
+                    <div class="worker-actions">
+                        <button class="btn-hire" onclick="hireWorker(this, 'Anil Sharma')">🤝 Hire Karo</button>
+                        <button class="btn-profile">👤 Profile Dekho</button>
+                        <button class="btn-save" onclick="saveWorker(this)">🔖</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- WORKER 6 -->
+            <div class="worker-card" data-skill="driver" data-city="delhi" data-online="true" data-rating="4.4" data-rate="700">
+                <div class="worker-avatar">👷
+                    <div class="online-indicator"></div>
+                </div>
+                <div class="worker-body">
+                    <div class="worker-top">
+                        <div>
+                            <div class="worker-name">Rajesh Yadav</div>
+                            <div style="margin-top:6px">
+                                <span class="stars">★★★★☆</span>
+                                <span class="review-count">(11 reviews)</span>
+                            </div>
+                        </div>
+                        <div class="worker-rate">₹700/din</div>
+                    </div>
+                    <div class="worker-skill-badge">🚗 Driver</div>
+                    <div class="worker-meta-row">
+                        <span>📍 Delhi</span>
+                        <span>💼 8 saal experience</span>
+                        <span>🟢 Abhi Online</span>
+                        <span>✅ 7 jobs done</span>
+                    </div>
+                    <div class="worker-tags">
+                        <span class="tag">Heavy Vehicle</span>
+                        <span class="tag">Truck</span>
+                        <span class="tag">Long Route</span>
+                    </div>
+                    <div class="worker-actions">
+                        <button class="btn-hire" onclick="hireWorker(this, 'Rajesh Yadav')">🤝 Hire Karo</button>
+                        <button class="btn-profile">👤 Profile Dekho</button>
+                        <button class="btn-save" onclick="saveWorker(this)">🔖</button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- NO RESULTS -->
+        <div class="no-results" id="noResults">
+            <div class="emoji">🔍</div>
+            <h3>Koi Worker Nahi Mila</h3>
+            <p>Filter change karo ya doosri city try karo</p>
+        </div>
+
+        <!-- PAGINATION -->
+        <div class="pagination">
+            <button class="page-btn active">1</button>
+            <button class="page-btn">2</button>
+            <button class="page-btn">3</button>
+            <button class="page-btn">→</button>
+        </div>
+    </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+    function filterWorkers() {
+        const search = document.getElementById('searchInput').value.toLowerCase();
+        const skill  = document.getElementById('skillFilter').value.toLowerCase();
+        const city   = document.getElementById('cityFilter').value.toLowerCase();
+        const cards  = document.querySelectorAll('.worker-card');
+        let count = 0;
+
+        cards.forEach(card => {
+            const cardSkill = card.dataset.skill || '';
+            const cardCity  = card.dataset.city  || '';
+            const cardName  = card.querySelector('.worker-name').textContent.toLowerCase();
+            const matchSearch = !search || cardName.includes(search) || cardSkill.includes(search);
+            const matchSkill  = !skill  || cardSkill === skill;
+            const matchCity   = !city   || cardCity.includes(city.toLowerCase());
+
+            if (matchSearch && matchSkill && matchCity) {
+                card.style.display = 'flex';
+                count++;
+            } else {
+                card.style.display = 'none';
+            }
+        });
+
+        document.getElementById('resultCount').textContent = count;
+        document.getElementById('noResults').classList.toggle('show', count === 0);
+    }
+
+    function quickFilter(type, btn) {
+        document.querySelectorAll('.qf-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const cards = document.querySelectorAll('.worker-card');
+        let count = 0;
+
+        cards.forEach(card => {
+            let show = true;
+            if (type === 'online')   show = card.dataset.online === 'true';
+            if (type === 'top')      show = parseFloat(card.dataset.rating) >= 4.7;
+            if (type === 'cheap')    show = parseInt(card.dataset.rate) <= 900;
+            if (type === 'verified') show = !!card.querySelector('.verified');
+            card.style.display = show ? 'flex' : 'none';
+            if (show) count++;
+        });
+
+        document.getElementById('resultCount').textContent = count;
+        document.getElementById('noResults').classList.toggle('show', count === 0);
+    }
+
+    function hireWorker(btn, name) {
+        btn.textContent = '✅ Request Bheja!';
+        btn.style.background = 'var(--green)';
+        btn.disabled = true;
+        showToast('✅ ' + name + ' ko hire request bhej di!');
+    }
+
+    function saveWorker(btn) {
+        btn.textContent = '🔖';
+        btn.style.color  = 'var(--orange)';
+        btn.style.borderColor = 'var(--orange)';
+        showToast('🔖 Worker save ho gaya!');
+    }
+
+    function clearFilters() {
+        document.getElementById('searchInput').value = '';
+        document.getElementById('skillFilter').value = '';
+        document.getElementById('cityFilter').value  = '';
+        document.querySelectorAll('.worker-card').forEach(c => c.style.display = 'flex');
+        document.getElementById('resultCount').textContent = '6';
+        document.getElementById('noResults').classList.remove('show');
+        document.querySelectorAll('.qf-btn').forEach(b => b.classList.remove('active'));
+        document.querySelector('.qf-btn').classList.add('active');
+        showToast('Filters clear ho gaye!');
+    }
+
+    function showToast(msg) {
+        const t = document.getElementById('toast');
+        t.textContent = msg;
+        t.classList.add('show');
+        setTimeout(() => t.classList.remove('show'), 3000);
+    }
+</script>
+</body>
+</html>
