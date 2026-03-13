@@ -289,12 +289,49 @@
             color: var(--gray);
             font-size: 14px;
         }
+        @media (max-width: 768px) {
+    .conv-list {
+        width: 100%;
+        position: absolute;
+        top: 57px;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 10;
+    }
+    .chat-area {
+        width: 100%;
+        position: absolute;
+        top: 57px;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 10;
+        display: none;
+    }
+    .chat-area.mobile-show {
+        display: flex;
+    }
+    .chat-layout {
+        position: relative;
+    }
+    .nav-back {
+        display: none;
+    }
+    .mobile-back {
+        display: flex !important;
+    }
+}
     </style>
 </head>
 <body>
 
 <nav>
     <a href="index.html" class="logo">Worker<span>Connect</span></a>
+    <button class="mobile-back" onclick="document.getElementById('chatArea').classList.remove('mobile-show')" 
+    style="display:none;background:none;border:none;color:var(--gray);font-size:13px;cursor:pointer;align-items:center;gap:6px;">
+        ← Wapas
+    </button>
     <a id="backLink" href="worker-dashboard.html" class="nav-back">← Dashboard pe wapas jao</a>
 </nav>
 
@@ -409,6 +446,9 @@
     // Chat open karo
     function openChat(chatId, otherUser, otherUid, item) {
         activeChatId = chatId;
+
+        // Mobile pe chat area dikhao
+        document.getElementById('chatArea').classList.add('mobile-show');
 
         // Active highlight
         document.querySelectorAll('.conv-item').forEach(i => i.classList.remove('active'));
